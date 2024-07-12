@@ -1,5 +1,6 @@
 ---
 title: "Política Judicial"
+subtitle: "Uma proposta de mensuração dos posicionamentos ideológicos dos Ministros do STF a partir das decisões proferidas em ações de controle concentrado de constitucionalidade ajuizadas por partidos políticos" 
 author: "Gustavo Henrique Catisane Diniz"
 date: "`r Sys.Date()`"
 output: slidy_presentation
@@ -162,15 +163,16 @@ indicados por Presidentes da República classificados ideologicamente como de
 Direita diverge da média dos "posicionamentos ideológicos" dos Ministros do STF 
 indicados por Presidentes da República ideologicamente classificados como de Esquerda. 
 
-Para a mensuração do denominado "posicionamento ideológico" dos Ministros do Supremo Tribunal Federal foi criado um "proxy" consistente na diferença entre o número de decisões favoráveis proferidas pelos Ministros do STF em processos de controle concentrado de constitucionalidade (ADC/ADI/ADPF) ajuizadas por partidos ideologicamente classificados à Esquerda e à Direita do espectro ideológico. 
+Para a mensuração do denominado "posicionamento ideológico" dos Ministros do Supremo Tribunal Federal foi criado um "proxy" consistente na diferença entre o número de decisões proferidas em processos de controle concentrado de constitucionalidade (ADC/ADI/ADPF) favoráveis a partidos políticos de esquerda ou de direita. 
 
-Tendo em vista que o número de processos ajuizados pelos partidos de direita é menor do que o número de processos ajuizados pelos partidos de esquerda (786 a 1341), foi atribuído o peso de 1,7 às decisões proferidas nos processos ajuizados pelos partidos de direita. A fim de evitar números negativos, a cada um dos valores foi adicionado 50 unidades. Desse modo, valores acima de 50 revelam posicionamento ideológico à esquerda e valores abaixo de 50 revelam posicionamento ideológico à direita. 
+Tendo em vista que o número de processos ajuizados pelos partidos de direita é menor do que o número de processos ajuizados pelos partidos de esquerda (786 a 1341), foi atribuído o peso de 1,7 às decisões proferidas nos processos ajuizados pelos partidos de direita. A fim de evitar valores negativos, a cada um dos valores foi adicionado 50 unidades. Desse modo, valores acima de 50 revelam posicionamento ideológico à esquerda e valores abaixo de 50 revelam posicionamento ideológico à direita. 
 
 Os Ministros da Suprema Corte foram classificados ideologicamente com base na ideologia do Presidente que os indicou. Além dos processos ajuizados pelos partidos políticos, foram incluídos os ajuizados pelos Presidentes da República eleitos a partir de 1988. Foram consideradas as decisões proferidas após a promulgação da Constituição de 1988. 
 
 ## Distribuição dos posicionamentos ideológicos dos Ministros do STF desde a Constituição de 1988
 
 ```{r cars, echo = FALSE, message=FALSE, warning=FALSE}
+
 library(infer)
 
 ideologia_media <- sumario2 %>% 
@@ -184,5 +186,23 @@ intervalo_ideologia <- ideologia_media %>%
 (intervalo_visualizacao <- visualize(ideologia_media) + 
   shade_confidence_interval(endpoints = intervalo_ideologia))
 ```
+## Ações de controle concentrado de constitucionalidade ajuizadas por partidos políticos desde de 1988
 
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+Sumario_ajuizamento <- partidos %>% group_by(requerente_ideologia) %>%
+  summarise(acoes_ajuizadas = n()) %>% na.omit() %>% 
+  mutate(prop = acoes_ajuizadas/2127*100)
+Sumario_ajuizamento %>% knitr::kable()
+
+```
+
+## Ideologia do Presidente responsável pela indicação do Ministro x Posicionamento ideológico do Ministro 
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+sumario2 <- sumario1 %>% select(relator, Presidente_ideologia, posicao_ideologia) %>% 
+  rename(Ministro = relator, Presidente_ideologia_indicacao = Presidente_ideologia) %>% na.omit() %>% 
+  mutate(posicao_ideologia_ajustada = posicao_ideologia + 50) 
+sumario2 %>% knitr::kable()
+
+```
 
